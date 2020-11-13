@@ -374,7 +374,11 @@ class ContentExtension extends AbstractExtension
     public function getLink($contentOrTaxonomy, bool $canonical = false, ?string $locale = null): ?string
     {
         if ($contentOrTaxonomy instanceof Content) {
-            if ($contentOrTaxonomy->getId() === null || $contentOrTaxonomy->getDefinition()->get('viewless')) {
+            if ($contentOrTaxonomy->getId() === null) {
+                return null;
+            }
+
+            if ($contentOrTaxonomy->getDefinition()->get('viewless') && $this->getSpecialFeature($contentOrTaxonomy) !== 'homepage') {
                 return null;
             }
 
@@ -457,6 +461,8 @@ class ContentExtension extends AbstractExtension
         if (! $content instanceof Content) {
             $body = sprintf("You have called the <code>|taxonomies</code> filter with a parameter of type '%s', but <code>|taxonomies</code> accepts record (Content).", gettype($content));
             $this->notifications->warning('Incorrect use of <code>|taxonomies</code> filter', $body);
+
+            return new Collection();
         }
 
         $taxonomies = [];
